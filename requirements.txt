@@ -1,0 +1,8 @@
+# Core MediaPipe and Computer Vision Dependencies
+mediapipe>=0.10.0
+opencv-python>=4.5.0
+numpy>=1.21.0
+
+# Optional: Enhanced performance and additional features
+# opencv-contrib-python>=4.5.0  # Additional OpenCV modules
+# pillow>=8.0.0                 # Image processing utilities
