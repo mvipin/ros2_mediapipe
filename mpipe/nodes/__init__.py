@@ -1,12 +1,18 @@
-"""Application-specific MediaPipe nodes."""
+"""
+MediaPipe Detection Nodes for ROS 2
 
-# Import baseline implementations for now
-from .object_detection_baseline import ObjectDetectionNode
-from .gesture_recognition_baseline import GestureRecognitionBaselineNode  
-from .pose_detection_baseline import PoseDetectionBaselineNode
+Provides ready-to-use detection nodes:
+- ObjectDetectionNode: COCO object detection with EfficientDet
+- GestureRecognitionNode: Hand gesture recognition with landmarks
+- PoseDetectionNode: 33-point pose landmark detection with classification
+"""
+
+from .object_detection_node import ObjectDetectionNode
+from .gesture_recognition_node import GestureRecognitionNode
+from .pose_detection_node import PoseDetectionNode
 
 __all__ = [
     'ObjectDetectionNode',
-    'GestureRecognitionBaselineNode', 
-    'PoseDetectionBaselineNode'
+    'GestureRecognitionNode',
+    'PoseDetectionNode'
 ]

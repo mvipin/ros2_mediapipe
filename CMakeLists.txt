@@ -42,9 +42,6 @@ install(PROGRAMS
   mpipe/nodes/object_detection_node.py
   mpipe/nodes/gesture_recognition_node.py
   mpipe/nodes/pose_detection_node.py
-  mpipe/nodes/object_detection_baseline.py
-  mpipe/nodes/gesture_recognition_baseline.py
-  mpipe/nodes/pose_detection_baseline.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -244,7 +244,18 @@ class PoseDetectionNode(MediaPipeBaseNode, MediaPipeCallbackMixin):
                     self.pose_data_pub.publish(pose_msg)
 
                 if self.config.debug_mode:
-                    self.get_logger().info(f"Published pose: {pose_action} (landmarks: {len(result.pose_landmarks[0].landmark) if result.pose_landmarks[0] else 0})")
+                    # Handle both MediaPipe pose landmark formats for debug logging
+                    pose_first = result.pose_landmarks[0] if result.pose_landmarks else None
+                    if pose_first:
+                        if hasattr(pose_first, 'landmark'):
+                            landmark_count = len(pose_first.landmark)
+                        elif hasattr(pose_first, '__len__'):
+                            landmark_count = len(pose_first)
+                        else:
+                            landmark_count = 0
+                    else:
+                        landmark_count = 0
+                    self.get_logger().info(f"Published pose: {pose_action} (landmarks: {landmark_count})")
             else:
                 # No poses detected
                 self.current_pose_action = 'no_pose'

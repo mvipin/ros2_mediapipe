@@ -53,14 +53,24 @@ source install/setup.bash
 
 ## 🎯 Quick Start
 
+**Note**: ros2_mediapipe nodes require a camera source publishing to `/camera/image_raw`. Start a camera node first:
+
+```bash
+# Start camera (in a separate terminal)
+ros2 run camera_ros camera_node --ros-args -p camera:=0 -p width:=640 -p height:=480
+```
+
 ### Pose Detection
 
 ```bash
 # Launch pose detection node
 ros2 launch ros2_mediapipe pose_detection.launch.py
 
-# View detected poses
-ros2 topic echo /pose_landmarks
+# View detected poses (with pose_action classification)
+ros2 topic echo /vision/pose
+
+# Visualize annotated image
+ros2 run image_tools showimage --ros-args -r image:=/vision/pose/annotated
 ```
 
 ### Gesture Recognition
@@ -70,7 +80,10 @@ ros2 topic echo /pose_landmarks
 ros2 launch ros2_mediapipe gesture_recognition.launch.py
 
 # View recognized gestures
-ros2 topic echo /hand_gestures
+ros2 topic echo /vision/gestures
+
+# Visualize annotated image
+ros2 run image_tools showimage --ros-args -r image:=/vision/gestures/annotated
 ```
 
 ### Object Detection
@@ -80,25 +93,47 @@ ros2 topic echo /hand_gestures
 ros2 launch ros2_mediapipe object_detection.launch.py
 
 # View detected objects
-ros2 topic echo /detected_objects
+ros2 topic echo /vision/objects
+
+# Visualize annotated image
+ros2 run image_tools showimage --ros-args -r image:=/vision/objects/annotated
 ```
 
 ## 📡 Topics
 
-### Published Topics
+### Input Topics (Subscribed)
 
 | Topic | Message Type | Description |
 |-------|-------------|-------------|
-| `/pose_landmarks` | `ros2_mediapipe/PoseLandmarks` | 33-point body pose landmarks with classification |
-| `/hand_gestures` | `ros2_mediapipe/HandGesture` | Hand gesture recognition results with confidence |
-| `/detected_objects` | `ros2_mediapipe/DetectedObjects` | Multi-object detection with bounding boxes |
-| `/annotated_image` | `sensor_msgs/Image` | Processed image with visual annotations |
+| `/camera/image_raw` | `sensor_msgs/Image` | Input camera feed (any encoding, converted internally) |
 
-### Subscribed Topics
+### Output Topics (Published)
 
+#### Object Detection Node
 | Topic | Message Type | Description |
 |-------|-------------|-------------|
-| `/camera/image_raw` | `sensor_msgs/Image` | Input camera feed for processing |
+| `/vision/objects` | `ros2_mediapipe/DetectedObjects` | Detected objects with bounding boxes, labels, confidence |
+| `/vision/objects/annotated` | `sensor_msgs/Image` | BGR8 annotated image with bounding boxes |
+
+#### Gesture Recognition Node
+| Topic | Message Type | Description |
+|-------|-------------|-------------|
+| `/vision/gestures` | `ros2_mediapipe/HandGesture` | Hand gesture and 21-point landmarks with confidence |
+| `/vision/gestures/annotated` | `sensor_msgs/Image` | BGR8 annotated image with hand landmarks |
+
+#### Pose Detection Node
+| Topic | Message Type | Description |
+|-------|-------------|-------------|
+| `/vision/pose` | `ros2_mediapipe/PoseLandmarks` | 33-point pose landmarks with pose_action classification |
+| `/vision/pose/annotated` | `sensor_msgs/Image` | BGR8 annotated image with skeleton overlay |
+
+### Pose Classification Values
+The `pose_action` field in PoseLandmarks can be:
+- `arms_raised` - Both arms raised above shoulders
+- `pointing_left` - Left arm extended horizontally
+- `pointing_right` - Right arm extended horizontally
+- `t_pose` - Both arms extended horizontally (T-shape)
+- `no_pose` - No recognized pose pattern
 
 ## ⚙️ Configuration
 
@@ -173,16 +208,16 @@ class GestureNavigationNode(Node):
         super().__init__('gesture_navigation')
         self.subscription = self.create_subscription(
             HandGesture,
-            '/hand_gestures',
+            '/vision/gestures',
             self.gesture_callback,
             10
         )
-    
+
     def gesture_callback(self, msg):
-        if msg.gesture_name == 'pointing_up':
+        if msg.gesture_name == 'Pointing_Up':
             # Move robot forward
             self.publish_cmd_vel(linear_x=0.5)
-        elif msg.gesture_name == 'open_palm':
+        elif msg.gesture_name == 'Open_Palm':
             # Stop robot
             self.publish_cmd_vel(linear_x=0.0)
 ```
@@ -198,14 +233,14 @@ class PoseControlNode(Node):
         super().__init__('pose_control')
         self.pose_sub = self.create_subscription(
             PoseLandmarks,
-            '/pose_landmarks',
+            '/vision/pose',
             self.pose_callback,
             10
         )
         self.cmd_pub = self.create_publisher(Twist, '/cmd_vel', 10)
-    
+
     def pose_callback(self, msg):
-        if msg.pose_class == 'pointing_left':
+        if msg.pose_action == 'pointing_left':
             twist = Twist()
             twist.angular.z = 0.5  # Turn left
             self.cmd_pub.publish(twist)
@@ -219,8 +254,15 @@ Run the test suite:
 # Unit tests
 colcon test --packages-select ros2_mediapipe
 
-# Integration tests with camera
-ros2 launch ros2_mediapipe pose_detection_baseline.launch.py
+# Manual integration test with camera
+# Terminal 1: Start camera
+ros2 run camera_ros camera_node --ros-args -p camera:=0 -p width:=640 -p height:=480
+
+# Terminal 2: Start detection node
+ros2 launch ros2_mediapipe pose_detection.launch.py debug_mode:=true
+
+# Terminal 3: Verify topic output
+ros2 topic echo /vision/pose
 ```
 
 ## 🤝 Contributing

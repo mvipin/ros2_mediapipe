@@ -142,20 +142,61 @@ class MessageConverter:
         return points
     
     @staticmethod
-    def create_pose_landmarks_message(pose_landmarks, confidence: float, 
+    def create_pose_landmarks_message(pose_landmarks, confidence: float,
                                     pose_action: str = "no_pose") -> PoseLandmarks:
         """Create PoseLandmarks message from MediaPipe pose landmarks."""
         msg = PoseLandmarks()
         msg.confidence = confidence
         msg.pose_action = pose_action
-        
+
         if pose_landmarks:
             msg.landmarks = MessageConverter.mediapipe_landmarks_to_points(pose_landmarks.landmark)
             msg.num_poses = 1
         else:
             msg.landmarks = []
             msg.num_poses = 0
-        
+
+        return msg
+
+    @staticmethod
+    def pose_landmarks_to_ros(pose_landmarks, timestamp_ms: int) -> PoseLandmarks:
+        """Convert MediaPipe pose landmarks to ROS PoseLandmarks message.
+
+        Handles both MediaPipe pose landmark formats:
+        - Newer format: pose_landmarks is iterable list of landmarks
+        - Older format: pose_landmarks has .landmark attribute
+        """
+        msg = PoseLandmarks()
+        msg.timestamp_ms = timestamp_ms
+        msg.num_poses = 1
+
+        if pose_landmarks is None:
+            msg.num_poses = 0
+            return msg
+
+        try:
+            # Handle both possible MediaPipe pose landmark structures
+            if hasattr(pose_landmarks, '__iter__') and not hasattr(pose_landmarks, 'landmark'):
+                # pose_landmarks is already a list of landmarks (newer format)
+                for landmark in pose_landmarks:
+                    point = Point()
+                    point.x = float(landmark.x)
+                    point.y = float(landmark.y)
+                    point.z = float(landmark.z)
+                    msg.landmarks.append(point)
+            else:
+                # Access via .landmark attribute (older format)
+                for landmark in pose_landmarks.landmark:
+                    point = Point()
+                    point.x = float(landmark.x)
+                    point.y = float(landmark.y)
+                    point.z = float(landmark.z)
+                    msg.landmarks.append(point)
+        except Exception as e:
+            # Log error but return empty message
+            print(f"Error converting pose landmarks: {e}")
+            msg.num_poses = 0
+
         return msg
     
     @staticmethod
