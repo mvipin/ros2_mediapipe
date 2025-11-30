@@ -26,7 +26,7 @@ def generate_launch_description():
     declare_model_path = DeclareLaunchArgument(
         'model_path',
         default_value='models/efficientdet.tflite',
-        description='Path to object detection model (relative to gesturebot package)'
+        description='Path to object detection model (relative to ros2_mediapipe package)'
     )
 
     declare_confidence_threshold = DeclareLaunchArgument(

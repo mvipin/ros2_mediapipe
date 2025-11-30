@@ -180,9 +180,12 @@ class PoseDetectionNode(MediaPipeBaseNode, MediaPipeCallbackMixin):
             min_pose_presence_confidence = self.get_parameter('min_pose_presence_confidence').get_parameter_value().double_value
             min_tracking_confidence = self.get_parameter('min_tracking_confidence').get_parameter_value().double_value
 
-            # Resolve model path (relative to gesturebot package)
+            # Resolve model path (relative to ros2_mediapipe package install directory)
             if not model_path.startswith('/'):
-                model_path = f"/home/pi/GestureBot/gesturebot_ws/src/gesturebot/{model_path}"
+                import os
+                from ament_index_python.packages import get_package_prefix
+                package_prefix = get_package_prefix('ros2_mediapipe')
+                model_path = os.path.join(package_prefix, model_path)
 
             # Create callback
             callback = self.create_callback('pose_detection')
@@ -472,8 +475,6 @@ class PoseDetectionNode(MediaPipeBaseNode, MediaPipeCallbackMixin):
     def process_frame(self, frame: np.ndarray, timestamp: float) -> Optional[Dict]:
         """
         Process frame for pose detection (called from threaded context).
-
-        CRITICAL: This maintains the exact threading pattern from working GestureBot.
         """
         try:
             # Store frame for callback access

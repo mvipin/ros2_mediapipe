@@ -164,9 +164,12 @@ class GestureRecognitionNode(MediaPipeBaseNode, MediaPipeCallbackMixin):
             max_hands = self.get_parameter('max_hands').get_parameter_value().integer_value
             model_path = self.get_parameter('model_path').get_parameter_value().string_value
 
-            # Resolve model path (relative to gesturebot package)
+            # Resolve model path (relative to ros2_mediapipe package install directory)
             if not model_path.startswith('/'):
-                model_path = f"/home/pi/GestureBot/gesturebot_ws/src/gesturebot/{model_path}"
+                import os
+                from ament_index_python.packages import get_package_prefix
+                package_prefix = get_package_prefix('ros2_mediapipe')
+                model_path = os.path.join(package_prefix, model_path)
 
             # Create callback
             callback = self.create_callback('gesture_recognition')
@@ -189,8 +192,6 @@ class GestureRecognitionNode(MediaPipeBaseNode, MediaPipeCallbackMixin):
     def process_frame(self, frame: np.ndarray, timestamp: float) -> Optional[Dict]:
         """
         Process frame for gesture recognition (called from threaded context).
-        
-        CRITICAL: This maintains the exact threading pattern from working GestureBot.
         """
         try:
             # Store frame for callback access
@@ -219,8 +220,6 @@ class GestureRecognitionNode(MediaPipeBaseNode, MediaPipeCallbackMixin):
     def _process_callback_results(self, result, output_image, timestamp_ms, result_type):
         """
         Process MediaPipe callback results.
-        
-        CRITICAL: This is part of the essential callback chain from working GestureBot.
         """
         try:
             if result and (result.gestures or result.hand_landmarks):
@@ -293,8 +292,6 @@ class GestureRecognitionNode(MediaPipeBaseNode, MediaPipeCallbackMixin):
     def publish_results(self, results: Dict, timestamp: float) -> None:
         """
         Publish gesture results and annotated images.
-        
-        CRITICAL: This completes the essential callback chain from working GestureBot.
         """
         try:
             gesture_info = results.get('gesture_info')

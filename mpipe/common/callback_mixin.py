@@ -40,9 +40,8 @@ class MediaPipeCallbackMixin:
     def create_callback(self, result_type: str) -> Callable:
         """
         Create callback function for MediaPipe results.
-        
+
         This is the entry point for MediaPipe controller callbacks.
-        Maintains the essential callback chain from working GestureBot.
         """
         def callback(result, output_image, timestamp_ms):
             with self.callback_lock:
