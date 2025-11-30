@@ -43,8 +43,8 @@ class PoseDetectionNode(MediaPipeBaseNode, MediaPipeCallbackMixin):
     landmark data and high-level pose classifications for downstream applications.
 
     Publishers:
-        /vision/pose (PoseLandmarks): Detected pose landmarks and classification
-        /vision/pose/annotated_image (Image): Annotated image with pose overlay
+        /vision/poses (PoseLandmarks): Detected pose landmarks and classification
+        /vision/poses/annotated (Image): Annotated image with pose overlay
 
     Subscribers:
         /camera/image_raw (Image): Input camera images

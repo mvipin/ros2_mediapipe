@@ -42,7 +42,7 @@ class GestureRecognitionNode(MediaPipeBaseNode, MediaPipeCallbackMixin):
 
     Publishers:
         /vision/gestures (HandGesture): Detected hand gestures and landmarks
-        /vision/gestures/annotated_image (Image): Annotated image with hand overlay
+        /vision/gestures/annotated (Image): Annotated image with hand overlay
 
     Subscribers:
         /camera/image_raw (Image): Input camera images

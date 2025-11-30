@@ -58,12 +58,12 @@ class TopicConfig:
     camera_topic: str = "/camera/image_raw"
 
     # Output topics (will be prefixed with node-specific namespace)
-    pose_topic: str = "/vision/pose"
+    pose_topic: str = "/vision/poses"
     gesture_topic: str = "/vision/gestures"
     objects_topic: str = "/vision/objects"
 
     # Annotated image topics
-    pose_annotated_topic: str = "/vision/pose/annotated"
+    pose_annotated_topic: str = "/vision/poses/annotated"
     gesture_annotated_topic: str = "/vision/gestures/annotated"
     objects_annotated_topic: str = "/vision/objects/annotated"
 

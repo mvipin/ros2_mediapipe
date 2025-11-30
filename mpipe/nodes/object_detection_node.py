@@ -43,7 +43,7 @@ class ObjectDetectionNode(MediaPipeBaseNode, MediaPipeCallbackMixin):
 
     Publishers:
         /vision/objects (DetectedObjects): Detected objects with bounding boxes
-        /vision/objects/annotated_image (Image): Annotated image with bounding boxes
+        /vision/objects/annotated (Image): Annotated image with bounding boxes
 
     Subscribers:
         /camera/image_raw (Image): Input camera images
