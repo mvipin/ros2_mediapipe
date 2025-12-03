@@ -149,16 +149,17 @@ class MediaPipeBaseNode(Node, ABC):
         ensure the lock covers the full inference cycle, not just the detect_async()
         call. This ensures frames arriving during inference are dropped.
         """
-        if not self.processing_lock.acquire(blocking=False):
-            # Skip frame if still processing previous one
-            return
-
         # Convert timestamp to milliseconds for tracking
         timestamp_ms = int(timestamp * 1000)
 
-        # Track that we hold the lock for this timestamp (released in callback)
-        if hasattr(self, '_lock_holders'):
-            self._lock_holders.add(timestamp_ms)
+        # Acquire lock with timestamp tracking via LockLifecycleManager (from mixin)
+        if hasattr(self, '_acquire_processing_lock'):
+            if not self._acquire_processing_lock(timestamp_ms):
+                # Skip frame if still processing previous one
+                return
+        elif not self.processing_lock.acquire(blocking=False):
+            # Fallback for nodes without mixin
+            return
 
         try:
             # Call subclass implementation - this submits to MediaPipe async
@@ -171,9 +172,10 @@ class MediaPipeBaseNode(Node, ABC):
         except Exception as e:
             self.get_logger().error(f'[{self.feature_name}] Error processing frame: {e}')
             # Release lock on error since callback won't fire
-            if hasattr(self, '_lock_holders'):
-                self._lock_holders.discard(timestamp_ms)
-            self.processing_lock.release()
+            if hasattr(self, '_release_processing_lock'):
+                self._release_processing_lock(timestamp_ms)
+            else:
+                self.processing_lock.release()
 
     @abstractmethod
     def process_frame(self, frame: np.ndarray, timestamp: float):

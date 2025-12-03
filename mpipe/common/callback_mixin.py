@@ -3,10 +3,13 @@
 MediaPipe Callback Mixin
 
 Simplified callback handling for MediaPipe results without performance tracking.
+Uses LockLifecycleManager from core module for thread-safe lock management.
 """
 
 from abc import abstractmethod
-from typing import Callable
+from typing import Callable, Optional
+
+from ..core import LockLifecycleManager
 
 
 class MediaPipeCallbackMixin:
@@ -17,17 +20,19 @@ class MediaPipeCallbackMixin:
 
     Note: MediaPipe LIVE_STREAM mode uses a single callback thread internally,
     so no additional synchronization is needed for callback serialization.
-    The processing_lock in base_node.py handles frame dropping during inference.
+    The LockLifecycleManager handles frame dropping during inference.
     """
 
     def __init__(self):
         self._base_node_ref = None
-        # Track which timestamps hold the processing lock (released in callback)
-        self._lock_holders: set = set()
+        self._lock_manager: Optional[LockLifecycleManager] = None
 
     def _set_base_node_reference(self, node):
-        """Set reference to base node for callback publishing."""
+        """Set reference to base node for callback publishing and lock management."""
         self._base_node_ref = node
+        # Initialize lock manager with node's processing lock
+        if hasattr(node, 'processing_lock'):
+            self._lock_manager = LockLifecycleManager(node.processing_lock)
 
     def create_callback(self, result_type: str) -> Callable:
         """
@@ -62,21 +67,33 @@ class MediaPipeCallbackMixin:
 
         Called from callback after inference completes to allow next frame to be processed.
         """
-        if self._base_node_ref and timestamp_ms in self._lock_holders:
-            self._lock_holders.discard(timestamp_ms)
-            self._base_node_ref.processing_lock.release()
-    
+        if self._lock_manager:
+            self._lock_manager.release_for_timestamp(timestamp_ms)
+
+    def _acquire_processing_lock(self, timestamp_ms: int) -> bool:
+        """
+        Acquire the processing lock for a given timestamp.
+
+        Called from _process_frame_async to acquire lock with timestamp tracking.
+
+        Returns:
+            True if lock was acquired, False if busy (frame should be dropped)
+        """
+        if self._lock_manager:
+            return self._lock_manager.acquire_for_timestamp(timestamp_ms)
+        return False
+
     @abstractmethod
     def _process_callback_results(self, result, output_image, timestamp_ms, result_type):
         """
         Process MediaPipe callback results. Must be implemented by subclass.
-        
+
         Args:
             result: MediaPipe detection result
             output_image: Annotated output image from MediaPipe
             timestamp_ms: Timestamp in milliseconds
             result_type: Type of result ('object', 'gesture', 'pose')
-            
+
         Returns:
             Processed results ready for publishing
         """

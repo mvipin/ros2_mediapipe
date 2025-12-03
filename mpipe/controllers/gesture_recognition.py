@@ -3,14 +3,14 @@
 Gesture Recognition Controller for MediaPipe Integration
 
 Provides MediaPipe GestureRecognizer integration using Tasks API.
+Uses shared factory function from core module.
 """
 
 from typing import Callable
 import mediapipe as mp
-from mediapipe.tasks import python as mp_py
-from mediapipe.tasks.python import vision as mp_vis
 
 from .base import MediaPipeController
+from ..core import create_gesture_recognizer
 
 
 class GestureRecognitionController(MediaPipeController):
@@ -25,25 +25,21 @@ class GestureRecognitionController(MediaPipeController):
     ) -> None:
         """
         Initialize gesture recognition controller.
-        
+
         Args:
             model_path: Path to the gesture recognition model file
             confidence_threshold: Minimum confidence threshold for hand detection
             max_hands: Maximum number of hands to detect
             result_callback: Callback function for processing results
         """
-        base_options = mp_py.BaseOptions(model_asset_path=model_path)
-        options = mp_vis.GestureRecognizerOptions(
-            base_options=base_options,
-            running_mode=mp_vis.RunningMode.LIVE_STREAM,
+        self._recognizer = create_gesture_recognizer(
+            model_path=model_path,
             num_hands=max_hands,
             min_hand_detection_confidence=confidence_threshold,
             min_hand_presence_confidence=0.5,
             min_tracking_confidence=0.5,
             result_callback=result_callback,
         )
-        # Initialize recognizer upon construction
-        self._recognizer = mp_vis.GestureRecognizer.create_from_options(options)
 
     def is_ready(self) -> bool:
         """Check if the recognizer is ready for processing."""

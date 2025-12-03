@@ -3,14 +3,14 @@
 Pose Detection Controller for MediaPipe Integration
 
 Provides MediaPipe PoseLandmarker integration using Tasks API.
+Uses shared factory function from core module.
 """
 
 from typing import Callable
 import mediapipe as mp
-from mediapipe.tasks import python as mp_py
-from mediapipe.tasks.python import vision as mp_vis
 
 from .base import MediaPipeController
+from ..core import create_pose_landmarker
 
 
 class PoseDetectionController(MediaPipeController):
@@ -28,7 +28,7 @@ class PoseDetectionController(MediaPipeController):
     ) -> None:
         """
         Initialize pose detection controller.
-        
+
         Args:
             model_path: Path to the pose detection model file
             num_poses: Maximum number of poses to detect
@@ -38,19 +38,15 @@ class PoseDetectionController(MediaPipeController):
             output_segmentation_masks: Whether to output segmentation masks
             result_callback: Callback function for processing results
         """
-        base_options = mp_py.BaseOptions(model_asset_path=model_path)
-        options = mp_vis.PoseLandmarkerOptions(
-            base_options=base_options,
-            running_mode=mp_vis.RunningMode.LIVE_STREAM,
+        self._landmarker = create_pose_landmarker(
+            model_path=model_path,
             num_poses=num_poses,
             min_pose_detection_confidence=min_pose_detection_confidence,
             min_pose_presence_confidence=min_pose_presence_confidence,
             min_tracking_confidence=min_tracking_confidence,
-            output_segmentation_masks=output_segmentation_masks,
             result_callback=result_callback,
+            output_segmentation_masks=output_segmentation_masks,
         )
-        # Initialize landmarker upon construction
-        self._landmarker = mp_vis.PoseLandmarker.create_from_options(options)
 
     def is_ready(self) -> bool:
         """Check if the landmarker is ready for processing."""

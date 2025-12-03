@@ -1,0 +1,122 @@
+{
+  "overall": {
+    "total_frames": 936,
+    "total_detections": 841,
+    "correct_detections": 757,
+    "accuracy": 0.8087606837606838,
+    "detection_rate": 0.8985042735042735,
+    "fps_mean": 14.60350961403944,
+    "latency_mean_ms": 68.47668994846455,
+    "latency_std_ms": 7.098951126752247,
+    "latency_p95_ms": 71.65796126355417,
+    "latency_p99_ms": 73.31635165028274
+  },
+  "resource_usage": {
+    "num_samples": 699,
+    "duration_s": 70.22483921051025,
+    "cpu_mean": 111.21330472103004,
+    "cpu_max": 129.4,
+    "cpu_p95": 119.5,
+    "cpu_p99": 129.3,
+    "memory_mb_mean": 215.2708836283977,
+    "memory_mb_max": 216.015625,
+    "memory_mb_p95": 216.015625,
+    "memory_mb_p99": 216.015625,
+    "temp_c_mean": 56.19606580829757,
+    "temp_c_max": 59.5,
+    "temp_c_p95": 58.4,
+    "temp_c_p99": 58.95
+  },
+  "per_gesture": {
+    "Closed_Fist": {
+      "total_frames": 136,
+      "total_detections": 114,
+      "correct_detections": 114,
+      "accuracy": 0.8382352941176471,
+      "detection_rate": 0.8382352941176471,
+      "fps_mean": 15.231421895594012,
+      "latency_mean_ms": 65.65375227963908,
+      "latency_std_ms": 10.890346750431187,
+      "latency_p95_ms": 71.76151500607375,
+      "latency_p99_ms": 76.71880103589504
+    },
+    "Open_Palm": {
+      "total_frames": 131,
+      "total_detections": 119,
+      "correct_detections": 105,
+      "accuracy": 0.8015267175572519,
+      "detection_rate": 0.9083969465648855,
+      "fps_mean": 14.236389860479964,
+      "latency_mean_ms": 70.24252705919407,
+      "latency_std_ms": 1.0318975570208697,
+      "latency_p95_ms": 71.67126552667469,
+      "latency_p99_ms": 73.1718595023267
+    },
+    "Pointing_Up": {
+      "total_frames": 131,
+      "total_detections": 121,
+      "correct_detections": 105,
+      "accuracy": 0.8015267175572519,
+      "detection_rate": 0.9236641221374046,
+      "fps_mean": 14.222824552694199,
+      "latency_mean_ms": 70.30952229601765,
+      "latency_std_ms": 1.2994548831305994,
+      "latency_p95_ms": 71.7454879777506,
+      "latency_p99_ms": 72.77080009807833
+    },
+    "Thumb_Down": {
+      "total_frames": 140,
+      "total_detections": 111,
+      "correct_detections": 99,
+      "accuracy": 0.7071428571428572,
+      "detection_rate": 0.7928571428571428,
+      "fps_mean": 15.259279745585038,
+      "latency_mean_ms": 65.53389259996558,
+      "latency_std_ms": 10.948915406042731,
+      "latency_p95_ms": 71.45896542060655,
+      "latency_p99_ms": 72.39425108535214
+    },
+    "Thumb_Up": {
+      "total_frames": 132,
+      "total_detections": 129,
+      "correct_detections": 114,
+      "accuracy": 0.8636363636363636,
+      "detection_rate": 0.9772727272727273,
+      "fps_mean": 14.289710523734332,
+      "latency_mean_ms": 69.98042390985188,
+      "latency_std_ms": 2.9500872983957596,
+      "latency_p95_ms": 71.57513589190785,
+      "latency_p99_ms": 72.29438834241591
+    },
+    "Victory": {
+      "total_frames": 135,
+      "total_detections": 122,
+      "correct_detections": 109,
+      "accuracy": 0.8074074074074075,
+      "detection_rate": 0.9037037037037037,
+      "fps_mean": 14.732938847050963,
+      "latency_mean_ms": 67.87512052968076,
+      "latency_std_ms": 8.05535264792091,
+      "latency_p95_ms": 71.55858688056469,
+      "latency_p99_ms": 71.93196087726392
+    },
+    "ILoveYou": {
+      "total_frames": 131,
+      "total_detections": 125,
+      "correct_detections": 111,
+      "accuracy": 0.8473282442748091,
+      "detection_rate": 0.9541984732824428,
+      "fps_mean": 14.273805193036148,
+      "latency_mean_ms": 70.05840324119572,
+      "latency_std_ms": 1.1323356549567816,
+      "latency_p95_ms": 71.61521149100736,
+      "latency_p99_ms": 71.9867569161579
+    }
+  },
+  "config": {
+    "model_path": "/home/pi/GestureBot/gesturebot_ws/install/ros2_mediapipe/models/gesture_recognizer.task",
+    "duration_per_gesture": 10.0,
+    "confidence_threshold": 0.5,
+    "camera_backend": "unknown"
+  }
+}

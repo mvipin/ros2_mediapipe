@@ -267,8 +267,6 @@ class PoseDetectionNode(MediaPipeBaseNode, MediaPipeCallbackMixin):
             if self._current_rgb_frame is not None:
                 annotated_image = self._create_annotated_image(self._current_rgb_frame.copy())
                 self._publish_annotated_image(annotated_image)
-                if self.config.debug_mode:
-                    self.get_logger().info("Published annotated pose image")
                 
         except Exception as e:
             if self.config.debug_mode:
@@ -323,33 +321,38 @@ class PoseDetectionNode(MediaPipeBaseNode, MediaPipeCallbackMixin):
             left_wrist = landmarks_list[15]      # Left wrist
             right_wrist = landmarks_list[16]     # Right wrist
 
-            # Configurable pose classification logic
+            # Pose classification logic
+            # Priority order: arms_raised -> t_pose -> pointing_left -> pointing_right
+            # Note: MediaPipe labels landmarks from person's perspective, but X-coordinates
+            # are in image space. When facing camera, person's left arm appears on right
+            # side of image (higher X values).
+
             # Arms raised: both wrists above shoulders
             if (left_wrist.y < left_shoulder.y and right_wrist.y < right_shoulder.y):
                 return 'arms_raised'
 
-            # Pointing left: left arm extended horizontally
-            elif (left_wrist.x < left_elbow.x < left_shoulder.x and
+            # T-pose: both arms extended horizontally outward (checked before pointing poses)
+            # Person's left extends to higher X, right extends to lower X
+            elif (abs(left_wrist.y - left_shoulder.y) < horizontal_tolerance and
+                  abs(right_wrist.y - right_shoulder.y) < horizontal_tolerance and
+                  left_wrist.x > left_shoulder.x and right_wrist.x < right_shoulder.x):
+                return 't_pose'
+
+            # Pointing left: left arm extended horizontally (wrist > elbow > shoulder in X)
+            elif (left_wrist.x > left_elbow.x > left_shoulder.x and
                   abs(left_wrist.y - left_shoulder.y) < horizontal_tolerance):
                 return 'pointing_left'
 
-            # Pointing right: right arm extended horizontally
-            elif (right_wrist.x > right_elbow.x > right_shoulder.x and
+            # Pointing right: right arm extended horizontally (wrist < elbow < shoulder in X)
+            elif (right_wrist.x < right_elbow.x < right_shoulder.x and
                   abs(right_wrist.y - right_shoulder.y) < horizontal_tolerance):
                 return 'pointing_right'
-
-            # T-pose: both arms extended horizontally
-            elif (abs(left_wrist.y - left_shoulder.y) < horizontal_tolerance and
-                  abs(right_wrist.y - right_shoulder.y) < horizontal_tolerance and
-                  left_wrist.x < left_shoulder.x and right_wrist.x > right_shoulder.x):
-                return 't_pose'
 
             else:
                 return 'no_pose'
 
         except Exception as e:
-            if self.config.debug_mode:
-                self.get_logger().error(f'Error classifying pose: {e}')
+            self.get_logger().debug(f'Error classifying pose: {e}')
             return 'no_pose'
 
     def _create_annotated_image(self, image: np.ndarray) -> np.ndarray:

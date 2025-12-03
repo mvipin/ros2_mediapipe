@@ -34,6 +34,7 @@ from mediapipe.tasks import python as mp_py
 from mediapipe.tasks.python import vision as mp_vis
 
 from coco_evaluator import COCOEvaluator
+from resource_monitor import ResourceMonitor
 
 
 def load_image(image_path: str) -> mp.Image:
@@ -193,8 +194,14 @@ def run_evaluation(
     inference_times = []
     total_detections = 0
 
+    # Initialize resource monitor (100ms sampling interval, consistent with benchmark_runner.py)
+    resource_monitor = ResourceMonitor(interval_ms=100)
+
     print(f"Running inference on {num_images} images (+ {warmup} warmup)...")
     print("-" * 60)
+
+    # Start resource monitoring before inference loop
+    resource_monitor.start()
 
     for i, img_id in enumerate(image_ids):
         # Download image
@@ -220,6 +227,10 @@ def run_evaluation(
 
     detector.close()
 
+    # Stop resource monitoring after inference loop
+    resource_monitor.stop()
+    resource_stats = resource_monitor.get_statistics()
+
     # Calculate timing statistics
     inference_times = np.array(inference_times)
     timing_stats = {
@@ -239,6 +250,7 @@ def run_evaluation(
 
     return {
         **timing_stats,
+        **resource_stats,
         **accuracy_metrics,
         'num_images': num_images,
         'total_detections': total_detections,
@@ -581,6 +593,12 @@ def main():
     print(f"  mAP@0.50:0.95:   {results['mAP_50_95']:.4f}")
     print(f"  mAP@0.75:        {results['mAP_75']:.4f}")
     print(f"  Recall:          {results['recall']:.4f}")
+
+    print("\nResource Metrics:")
+    print(f"  CPU Mean/P95:    {results['cpu_mean']:.1f}% / {results['cpu_p95']:.1f}%")
+    print(f"  Memory Mean/Max: {results['memory_mb_mean']:.0f} MB / {results['memory_mb_max']:.0f} MB")
+    print(f"  Temperature Max: {results['temp_c_max']:.1f}°C")
+    print(f"  Samples:         {results['num_samples']} ({results['duration_s']:.1f}s)")
 
     print(f"\nTotal detections: {results['total_detections']} across {results['num_images']} images")
     print("=" * 60)

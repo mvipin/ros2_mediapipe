@@ -7,6 +7,7 @@ Provides stateless MediaPipe integration for ROS 2 with core vision processing c
 - ProcessingConfig: Configuration for MediaPipe processing
 - MediaPipe Controllers: Object detection, gesture recognition, pose detection
 - MessageConverter: ROS message conversion utilities
+- Core: Non-ROS components shared with benchmark tools
 
 This package focuses on core MediaPipe functionality without application-specific logic.
 """
@@ -23,6 +24,12 @@ from .controllers import (
     GestureRecognitionController,
     PoseDetectionController
 )
+from .core import (
+    LockLifecycleManager,
+    create_object_detector,
+    create_gesture_recognizer,
+    create_pose_landmarker
+)
 
 __version__ = "1.0.0"
 __author__ = "Vipin Mehta"
@@ -36,5 +43,9 @@ __all__ = [
     'MediaPipeController',
     'ObjectDetectionController',
     'GestureRecognitionController',
-    'PoseDetectionController'
+    'PoseDetectionController',
+    'LockLifecycleManager',
+    'create_object_detector',
+    'create_gesture_recognizer',
+    'create_pose_landmarker'
 ]

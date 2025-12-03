@@ -3,14 +3,14 @@
 Object Detection Controller for MediaPipe Integration
 
 Provides MediaPipe ObjectDetector (EfficientDet) integration using Tasks API.
+Uses shared factory function from core module.
 """
 
 from typing import Callable
 import mediapipe as mp
-from mediapipe.tasks import python as mp_py
-from mediapipe.tasks.python import vision as mp_vis
 
 from .base import MediaPipeController
+from ..core import create_object_detector
 
 
 class ObjectDetectionController(MediaPipeController):
@@ -25,23 +25,19 @@ class ObjectDetectionController(MediaPipeController):
     ) -> None:
         """
         Initialize object detection controller.
-        
+
         Args:
             model_path: Path to the EfficientDet model file
             confidence_threshold: Minimum confidence threshold for detections
             max_results: Maximum number of detection results
             result_callback: Callback function for processing results
         """
-        base_options = mp_py.BaseOptions(model_asset_path=model_path)
-        options = mp_vis.ObjectDetectorOptions(
-            base_options=base_options,
-            running_mode=mp_vis.RunningMode.LIVE_STREAM,
+        self._detector = create_object_detector(
+            model_path=model_path,
             max_results=max_results,
             score_threshold=confidence_threshold,
             result_callback=result_callback,
         )
-        # Initialize detector upon construction
-        self._detector = mp_vis.ObjectDetector.create_from_options(options)
 
     def is_ready(self) -> bool:
         """Check if the detector is ready for processing."""

@@ -1,0 +1,86 @@
+{
+  "overall": {
+    "total_frames": 567,
+    "total_detections": 492,
+    "correct_detections": 396,
+    "accuracy": 0.6984126984126984,
+    "detection_rate": 0.8677248677248677,
+    "fps_mean": 14.480323500808463,
+    "latency_mean_ms": 69.05923061347131,
+    "latency_std_ms": 6.922643799579382,
+    "latency_p95_ms": 77.09379763691683,
+    "latency_p99_ms": 87.04634041525426
+  },
+  "resource_usage": {
+    "num_samples": 400,
+    "duration_s": 40.15294003486633,
+    "cpu_mean": 107.61775,
+    "cpu_max": 119.5,
+    "cpu_p95": 119.4,
+    "cpu_p99": 119.5,
+    "memory_mb_mean": 208.20109375,
+    "memory_mb_max": 209.30859375,
+    "memory_mb_p95": 209.30859375,
+    "memory_mb_p99": 209.30859375,
+    "temp_c_mean": 53.121375,
+    "temp_c_max": 56.2,
+    "temp_c_p95": 55.1,
+    "temp_c_p99": 56.2
+  },
+  "per_pose": {
+    "arms_raised": {
+      "total_frames": 147,
+      "total_detections": 82,
+      "correct_detections": 57,
+      "accuracy": 0.3877551020408163,
+      "detection_rate": 0.5578231292517006,
+      "fps_mean": 15.209399386128615,
+      "latency_mean_ms": 65.7488158876298,
+      "latency_std_ms": 11.503870927434306,
+      "latency_p95_ms": 73.48059500218368,
+      "latency_p99_ms": 84.04789733351207
+    },
+    "pointing_left": {
+      "total_frames": 139,
+      "total_detections": 137,
+      "correct_detections": 100,
+      "accuracy": 0.7194244604316546,
+      "detection_rate": 0.9856115107913669,
+      "fps_mean": 14.129331120097318,
+      "latency_mean_ms": 70.77475865631156,
+      "latency_std_ms": 4.989139170280941,
+      "latency_p95_ms": 82.51956711756063,
+      "latency_p99_ms": 90.02864154637791
+    },
+    "pointing_right": {
+      "total_frames": 140,
+      "total_detections": 132,
+      "correct_detections": 109,
+      "accuracy": 0.7785714285714286,
+      "detection_rate": 0.9428571428571428,
+      "fps_mean": 14.278686194583582,
+      "latency_mean_ms": 70.0344545970438,
+      "latency_std_ms": 3.346122540919883,
+      "latency_p95_ms": 78.72787021333349,
+      "latency_p99_ms": 83.82582958554849
+    },
+    "t_pose": {
+      "total_frames": 141,
+      "total_detections": 141,
+      "correct_detections": 130,
+      "accuracy": 0.9219858156028369,
+      "detection_rate": 1.0,
+      "fps_mean": 14.316184804799242,
+      "latency_mean_ms": 69.85101223789512,
+      "latency_std_ms": 1.785457818468817,
+      "latency_p95_ms": 71.40416197944432,
+      "latency_p99_ms": 77.06235683290288
+    }
+  },
+  "config": {
+    "model_path": "/home/pi/GestureBot/gesturebot_ws/install/ros2_mediapipe/models/pose_landmarker.task",
+    "duration_per_pose": 10.0,
+    "confidence_threshold": 0.5,
+    "camera_backend": "rpicam"
+  }
+}

@@ -1,0 +1,98 @@
+# Benchmark Configuration for ros2_mediapipe Object Detection
+# Run benchmarks with: python3 benchmark_runner.py --config config.yaml
+
+# Dataset configuration
+dataset:
+  source: "COCO val2017"
+  image_dir: "data/images"
+  annotation_file: "data/instances_val2017.json"
+  total_images: 300
+  warmup_frames: 10  # Reduced for validation; increase to 50 for final benchmarks
+
+# Resource monitoring configuration
+resource_monitor:
+  enabled: true
+  interval_ms: 100  # Sampling interval
+
+# Output configuration
+output:
+  results_dir: "results"
+  csv_file: "benchmark_results.csv"
+  json_file: "benchmark_results.json"
+  generate_plots: true
+
+# Models to benchmark
+# For single-model benchmarks (benchmark_runner.py), use the first model
+# For multi-model comparison (model_comparison_runner.py), all models are used
+models:
+  # EfficientDet-Lite0 variants (320×320 input)
+  - name: "efficientdet_lite0_int8"
+    path: "../models/efficientdet_lite0_int8.tflite"
+    input_size: [320, 320]
+    quantization: "int8"
+
+  - name: "efficientdet_lite0_float16"
+    path: "../models/efficientdet_lite0_float16.tflite"
+    input_size: [320, 320]
+    quantization: "float16"
+
+  - name: "efficientdet_lite0_float32"
+    path: "../models/efficientdet_lite0_float32.tflite"
+    input_size: [320, 320]
+    quantization: "float32"
+
+  # EfficientDet-Lite2 variants (448×448 input)
+  - name: "efficientdet_lite2_int8"
+    path: "../models/efficientdet_lite2_int8.tflite"
+    input_size: [448, 448]
+    quantization: "int8"
+
+  - name: "efficientdet_lite2_float16"
+    path: "../models/efficientdet_lite2_float16.tflite"
+    input_size: [448, 448]
+    quantization: "float16"
+
+  - name: "efficientdet_lite2_float32"
+    path: "../models/efficientdet_lite2_float32.tflite"
+    input_size: [448, 448]
+    quantization: "float32"
+
+  # SSD MobileNetV2 variants (256×256 input)
+  - name: "ssd_mobilenetv2_int8"
+    path: "../models/ssd_mobilenetv2_int8.tflite"
+    input_size: [256, 256]
+    quantization: "int8"
+
+  - name: "ssd_mobilenetv2_float32"
+    path: "../models/ssd_mobilenetv2_float32.tflite"
+    input_size: [256, 256]
+    quantization: "float32"
+
+# Parameter grid for benchmarking
+# Each combination will be tested
+parameter_grid:
+  max_results: [1, 5, 10]
+  score_threshold: [0.3, 0.5, 0.7]
+
+# Benchmark configuration
+benchmark:
+  # Minimum frames to process per configuration (images recycled if needed)
+  # This ensures statistically significant results even with limited images
+  min_benchmark_frames: 100
+
+  # Warmup frames before timing (used by model_comparison_runner.py)
+  warmup_frames: 10
+
+  # Input frame rate (FPS) - simulates camera input rate
+  # 10 FPS matches optimal GestureBot camera rate
+  input_fps: 10.0
+
+  # Cooldown between runs (seconds) - helps stabilize temperature
+  cooldown_seconds: 5
+
+# Platform information (auto-detected, but can be overridden)
+platform:
+  name: "Raspberry Pi 5"
+  # cpu_model: auto-detected
+  # memory_total: auto-detected
+
