@@ -70,7 +70,6 @@ class MediaPipeBaseNode(Node, ABC):
         # Set up callback mixin reference if available
         if hasattr(self, '_set_base_node_reference'):
             self._set_base_node_reference(self)
-            self.enable_callback_processing()
 
         # ROS 2 components
         self.cv_bridge = CvBridge()
@@ -142,16 +141,28 @@ class MediaPipeBaseNode(Node, ABC):
     def _process_frame_async(self, frame: np.ndarray, timestamp: float) -> None:
         """
         Process frame in separate thread.
-        
+
         Uses non-blocking lock to skip frames if still processing previous one.
         This prevents frame queue buildup and maintains real-time performance.
+
+        IMPORTANT: Lock is acquired here but released in MediaPipe callback to
+        ensure the lock covers the full inference cycle, not just the detect_async()
+        call. This ensures frames arriving during inference are dropped.
         """
         if not self.processing_lock.acquire(blocking=False):
             # Skip frame if still processing previous one
             return
 
+        # Convert timestamp to milliseconds for tracking
+        timestamp_ms = int(timestamp * 1000)
+
+        # Track that we hold the lock for this timestamp (released in callback)
+        if hasattr(self, '_lock_holders'):
+            self._lock_holders.add(timestamp_ms)
+
         try:
-            # Call subclass implementation
+            # Call subclass implementation - this submits to MediaPipe async
+            # Lock will be released in the MediaPipe callback
             results = self.process_frame(frame, timestamp)
 
             if results is not None:
@@ -159,7 +170,9 @@ class MediaPipeBaseNode(Node, ABC):
 
         except Exception as e:
             self.get_logger().error(f'[{self.feature_name}] Error processing frame: {e}')
-        finally:
+            # Release lock on error since callback won't fire
+            if hasattr(self, '_lock_holders'):
+                self._lock_holders.discard(timestamp_ms)
             self.processing_lock.release()
 
     @abstractmethod
